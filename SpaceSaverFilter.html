@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Saver Filter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="selection:bg-teal-500 selection:text-white">
+    <div class="bg-slate-800 p-8 rounded-xl shadow-2xl w-full max-w-lg transition-all duration-300 hover:shadow-cyan-500/50">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-6 text-center">Space Saver Filter</h1>
+        <p class="text-slate-400 text-center mb-8">
+            Upload a file and see how much space you can save.
+        </p>
+
+        <div class="mb-6 flex flex-col items-center">
+            <label for="fileInput" class="w-full cursor-pointer">
+                <div id="drop-zone" class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center transition-colors duration-300 hover:bg-slate-700">
+                    <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4v-1a4 4 0 014-4h.586a2 2 0 011.414.586L10 11.414V14a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-3-3m0 0l-3 3m3-3V9a3 3 0 016 0v6a3 3 0 01-6 0z" />
+                    </svg>
+                    <p class="mt-2 text-sm text-white"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p class="text-xs text-slate-400">Any file type (max 100MB)</p>
+                </div>
+            </label>
+            <input type="file" id="fileInput" class="hidden" />
+        </div>
+
+        <div id="results" class="hidden mt-8 text-center bg-slate-700 p-6 rounded-lg">
+            <h2 class="text-xl font-bold text-white mb-4">Results</h2>
+            <div class="space-y-2">
+                <p>Original size: <span id="original-size" class="font-semibold text-white"></span></p>
+                <p>Estimated saved space: <span id="saved-space" class="font-semibold text-cyan-400"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('drop-zone');
+        const resultsDiv = document.getElementById('results');
+        const originalSizeSpan = document.getElementById('original-size');
+        const savedSpaceSpan = document.getElementById('saved-space');
+
+        // Function to process the file and display results
+        const processFile = (file) => {
+            if (!file) return;
+
+            const originalSizeKB = file.size / 1024;
+            const originalSizeMB = originalSizeKB / 1024;
+
+            // This is a placeholder for the compression logic.
+            // In a real app, this would be a more complex process.
+            const estimatedSavedSpaceKB = originalSizeKB * 0.4;
+            const savedPercentage = (estimatedSavedSpaceKB / originalSizeKB) * 100;
+
+            let originalSizeDisplay = `${originalSizeKB.toFixed(2)} KB`;
+            let savedSpaceDisplay = `${estimatedSavedSpaceKB.toFixed(2)} KB`;
+
+            if (originalSizeMB >= 1) {
+                originalSizeDisplay = `${originalSizeMB.toFixed(2)} MB`;
+                savedSpaceDisplay = `${(estimatedSavedSpaceKB / 1024).toFixed(2)} MB`;
+            }
+
+            originalSizeSpan.textContent = originalSizeDisplay;
+            savedSpaceSpan.textContent = savedSpaceDisplay;
+
+            resultsDiv.classList.remove('hidden');
+        };
+
+        // Handle file selection via button
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            processFile(file);
+        });
+
+        // Handle file drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        dropZone.addEventListener('dragenter', () => dropZone.classList.add('border-cyan-400'), false);
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-cyan-400'), false);
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.classList.remove('border-cyan-400');
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            processFile(files[0]);
+        }, false);
+    </script>
+</body>
+</html>
